@@ -2,6 +2,7 @@ package bingo
 
 import (
 	"fmt"
+	"strconv"
 )
 
 // Player user type
@@ -32,9 +33,28 @@ func (p *Player) printDetails() {
 	}
 }
 
-func (p *Player) CheckNumber(number int) {
+func (p *Player) CheckNumber(number int) bool {
+	win := false
 	for idx := range p.Cards {
 		card := &p.Cards[idx]
-		card.checkNumber(number)
+		win = card.checkNumber(number)
+		if win {
+			break
+		}
 	}
+	return win
+}
+
+func CreatePlayer(numberOfPlayers int) []Player {
+
+	// Create player
+	var playerList = []Player{}
+	for currentPlayerNo := 0; currentPlayerNo < numberOfPlayers; currentPlayerNo++ {
+		var playerName string = "Player " + strconv.Itoa(currentPlayerNo)
+		newPlayer := NewPlayer(currentPlayerNo, playerName)
+		playerList = append(playerList, newPlayer)
+	}
+	fmt.Println("Generated", numberOfPlayers, "player")
+
+	return playerList
 }

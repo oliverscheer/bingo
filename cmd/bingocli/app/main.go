@@ -1,126 +1,126 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math/rand"
 	"my/bingo"
-	"strconv"
 	"time"
 )
 
+// defaults
+const defaultNumberOfPlayer int = 1000
+const defaultNumberOfCardsForEachPlayer int = 1000
+const defaultSleepInMS int = 500
+const defaultIterations int = 1
+
 // TODO: Everything is linear. Always the first player in the row wins with the right numbers
 
+// TODO:
+
 func main() {
+
+	// commandline args
+	numberOfPlayers := flag.Int("player", defaultNumberOfPlayer, "number of simulated player")
+	numberOfCardsForEachPlayer := flag.Int("cards", defaultNumberOfCardsForEachPlayer, "number of cards for each player")
+	sleepInMS := flag.Int("sleep", defaultSleepInMS, "delay for each round in milliseconds")
+	iterations := flag.Int("iterations", defaultIterations, "number of interations")
+	// var svar string
+	// flag.StringVar(&svar, "svar", "bar", "a string var")
+
+	flag.Parse()
+
 	// TODO: Add version number here
 	fmt.Println("BinGO v.0.1")
 
-	const numberOfCardsForEachPlayer = 1000
-	const numberOfPlayers = 1000
-	const sleepInMS = 500
+	fmt.Println("- player    :", *numberOfPlayers)
+	fmt.Println("- cards     :", *numberOfCardsForEachPlayer)
+	fmt.Println("- sleep     :", *sleepInMS)
+	fmt.Println("- iterations:", *iterations)
+	fmt.Println()
 
-	rand.Seed(time.Now().UnixNano())
+	// fmt.Println("tail:", flag.Args())
 
-	// Create player
-	var playerList = []bingo.Player{}
-	for currentPlayerNo := 0; currentPlayerNo < numberOfPlayers; currentPlayerNo++ {
-		var playerName string = "Player " + strconv.Itoa(currentPlayerNo)
-		newPlayer := bingo.NewPlayer(currentPlayerNo, playerName)
-		playerList = append(playerList, newPlayer)
-	}
-	fmt.Println("Generated", numberOfPlayers, "player")
+	for iteration := 1; iteration <= *iterations; iteration++ {
 
-	// Create cards
-	var numberOfCards = numberOfPlayers * numberOfCardsForEachPlayer
-	var cardList = []bingo.BingoCard{}
-	for currentCardCount := 0; currentCardCount < numberOfCards; currentCardCount++ {
-		card := bingo.BingoCard{
-			ID: currentCardCount,
+		fmt.Println("### Iteration", iteration, "####")
+		// Initialize real random values
+		rand.Seed(time.Now().UnixNano())
+
+		// Create player
+		var playerList = bingo.CreatePlayer(*numberOfPlayers)
+
+		// Create cards
+		var numberOfCards = *numberOfPlayers * *numberOfCardsForEachPlayer
+		var cardList = bingo.CreateCards(numberOfCards)
+
+		// Distribute cards to player
+		currentCardID := 0
+		newCurrentCardID := 0
+		for idx := range playerList {
+			player := &playerList[idx]
+			for cardID := currentCardID; cardID < (currentCardID + *numberOfCardsForEachPlayer); {
+				player.AddCard(cardList[cardID])
+				cardID++
+				newCurrentCardID = cardID
+			}
+			currentCardID = newCurrentCardID
 		}
-		for x := 0; x < 5; x++ {
-			for y := 0; y < 5; y++ {
-				cell := &card.Cell[x][y]
-				if (x == 2) && (y == 2) {
-					cell.Hit = true
-					continue
+
+		// create pot
+		var pot []int
+		for ball := 0; ball < 75; ball++ {
+			var alreadyInPot bool = true
+			var newNumber int
+			for alreadyInPot {
+				newNumber = rand.Intn(75) + 1
+				if ball == 0 {
+					alreadyInPot = false
+					break
 				}
-				var v int
-				v = rand.Intn(15) + 1 + x*15
-				if y > 0 {
-					var check bool = false
-					for !check {
-						v = rand.Intn(15) + x*15 + 1
-						check = true
-						for ycheck := 0; ycheck < y; ycheck++ {
-							if card.Cell[x][ycheck].Value == v {
-								// number already exist, we need a new one
-								check = false
-								break
-							}
-						}
+				var found bool = false
+				for i := 0; i < ball; i++ {
+					if pot[i] == newNumber {
+						found = true
+						break
 					}
 				}
-				cell.Value = v
+				if !found {
+					alreadyInPot = false
+				}
 			}
+			pot = append(pot, ball)
+			pot[ball] = newNumber
 		}
 
-		// TODO: I do not check if similar card already exist
-		cardList = append(cardList, card)
-	}
-	fmt.Println("Generated", numberOfCards, "bingo cards")
-
-	// for idx := range cardList {
-	// 	card := cardList[idx]
-	// 	card.PrintDetails()
-	// }
-	// // return
-
-	// Distribute cards to player
-	currentCardID := 0
-	newCurrentCardID := 0
-	for idx := range playerList {
-		player := &playerList[idx]
-		for cardID := currentCardID; cardID < (currentCardID + numberOfCardsForEachPlayer); {
-			player.AddCard(cardList[cardID])
-			cardID++
-			newCurrentCardID = cardID
-		}
-		currentCardID = newCurrentCardID
-	}
-
-	// create pot
-	var pot []int
-	for ball := 0; ball < 75; ball++ {
-		var alreadyInPot bool = true
-		var newNumber int
-		for alreadyInPot {
-			newNumber = rand.Intn(75) + 1
-			if ball == 0 {
-				alreadyInPot = false
-				break
-			}
-			var found bool = false
-			for i := 0; i < ball; i++ {
-				if pot[i] == newNumber {
-					found = true
+		// linear way: get number and send it to player
+		win := false
+		for round := 1; round <= 75; round++ {
+			ms := time.Duration(*sleepInMS)
+			time.Sleep(ms * time.Millisecond)
+			currentNumber := pot[round-1]
+			fmt.Println("Round: ", round, " - Number: ", currentNumber)
+			for idx := range playerList {
+				player := &playerList[idx]
+				win = player.CheckNumber(currentNumber)
+				if win {
 					break
 				}
 			}
-			if !found {
-				alreadyInPot = false
+			if win {
+				break
 			}
 		}
-		pot = append(pot, ball)
-		pot[ball] = newNumber
-	}
 
-	// get number and send it to player
-	for round := 1; round <= 75; round++ {
-		time.Sleep(sleepInMS * time.Millisecond)
-		currentNumber := pot[round-1]
-		fmt.Println("Round: ", round, " - Number: ", currentNumber)
-		for idx := range playerList {
-			player := &playerList[idx]
-			player.CheckNumber(currentNumber)
-		}
+		// parallel way: get number and send it to player
+		// for round := 1; round <= 75; round++ {
+		// 	time.Sleep(sleepInMS * time.Millisecond)
+		// 	currentNumber := pot[round-1]
+		// 	fmt.Println("Round: ", round, " - Number: ", currentNumber)
+		// 	for idx := range playerList {
+		// 		player := &playerList[idx]
+		// 		player.CheckNumber(currentNumber)
+		// 	}
+		// }
 	}
 }
