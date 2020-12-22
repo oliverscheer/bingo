@@ -9,17 +9,20 @@ import (
 type Player struct {
 	ID    int
 	Name  string
-	Cards []BingoCard
+	Cards []Card
 }
 
 // NewPlayer creates a new player
 func NewPlayer(id int, name string) Player {
-	p := Player{ID: id, Name: name}
+	p := Player{
+		ID:   id,
+		Name: name,
+	}
 	return p
 }
 
 // AddCard adds a card to a player
-func (p *Player) AddCard(card BingoCard) {
+func (p *Player) AddCard(card Card) {
 	card.Player = *p
 	cards := append(p.Cards, card)
 	p.Cards = cards
@@ -33,11 +36,12 @@ func (p *Player) printDetails() {
 	}
 }
 
+// CheckNumber checks if card contains card
 func (p *Player) CheckNumber(number int) bool {
 	win := false
 	for idx := range p.Cards {
 		card := &p.Cards[idx]
-		win = card.checkNumber(number)
+		win = card.CheckNumber(number)
 		if win {
 			break
 		}
@@ -45,8 +49,8 @@ func (p *Player) CheckNumber(number int) bool {
 	return win
 }
 
+// CreatePlayer creates an array of player
 func CreatePlayer(numberOfPlayers int) []Player {
-
 	// Create player
 	var playerList = []Player{}
 	for currentPlayerNo := 0; currentPlayerNo < numberOfPlayers; currentPlayerNo++ {

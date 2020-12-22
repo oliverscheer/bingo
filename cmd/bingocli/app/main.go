@@ -44,11 +44,17 @@ func main() {
 	for iteration := 1; iteration <= *iterations; iteration++ {
 
 		fmt.Println("### Iteration", iteration, "####")
+
 		// Initialize real random values
 		rand.Seed(time.Now().UnixNano())
 
 		// Create player
 		var playerList = bingo.CreatePlayer(*numberOfPlayers)
+
+		// var game := bingo.NewGame(iteration)
+		// for p, _ := range &playerList {
+		// 	game.addPlayer(p)
+		// }
 
 		// Create cards
 		var numberOfCards = *numberOfPlayers * *numberOfCardsForEachPlayer
