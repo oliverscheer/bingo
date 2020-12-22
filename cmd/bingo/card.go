@@ -26,8 +26,8 @@ func (b *Card) CheckNumber(number int) bool {
 	return false
 }
 
+// CheckForWin checks the card for a win
 func (b *Card) CheckForWin() bool {
-
 	// Vertical line check
 	for x := 0; x < 5; x++ {
 		counter := 0
@@ -80,13 +80,6 @@ func (b *Card) CheckForWin() bool {
 			return true
 		}
 	}
-
-	// if win {
-	// 	fmt.Println()
-	// 	fmt.Println(b.Player.Name, "wins")
-	// 	b.PrintDetails()
-	// 	return true
-	// }
 
 	return false
 }

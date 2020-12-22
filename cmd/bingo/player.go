@@ -38,15 +38,23 @@ func (p *Player) printDetails() {
 
 // CheckNumber checks if card contains card
 func (p *Player) CheckNumber(number int) bool {
-	win := false
 	for idx := range p.Cards {
 		card := &p.Cards[idx]
-		win = card.CheckNumber(number)
-		if win {
-			break
+		if card.CheckNumber(number) {
+			return true
 		}
 	}
-	return win
+	return false
+}
+
+func (p *Player) CheckForWin() bool {
+	for idx := range p.Cards {
+		card := &p.Cards[idx]
+		if card.CheckForWin() {
+			return true
+		}
+	}
+	return false
 }
 
 // CreatePlayer creates an array of player
