@@ -5,9 +5,9 @@ import "testing"
 func TestCreateAndStartGameWithFivePlayer(t *testing.T) {
 
 	settings := GameSettings{
-		Delay: 100,
-		Cards: 2,
-		Verbose: true
+		Delay:   100,
+		Cards:   2,
+		Verbose: true,
 	}
 	game := NewGame(settings)
 
